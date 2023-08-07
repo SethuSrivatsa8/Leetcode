@@ -1,25 +1,22 @@
-# Write your MySQL query statement below
-WITH UserRatings AS (
-    SELECT u.name AS user_name, 
-           COUNT(*) AS rated_movies,
-           ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC, u.name ASC) AS user_rank
-    FROM Users u
-    JOIN MovieRating mr ON u.user_id = mr.user_id
-    GROUP BY u.name
-),
-MovieAvgRatings AS (
-    SELECT m.title AS movie_title, 
-           AVG(mr.rating) AS avg_rating,
-           ROW_NUMBER() OVER (ORDER BY AVG(mr.rating) DESC, m.title ASC) AS movie_rank
-    FROM Movies m
-    JOIN MovieRating mr ON m.movie_id = mr.movie_id
-    WHERE DATE_FORMAT(mr.created_at, '%Y-%m') = '2020-02'
-    GROUP BY m.title
+WITH CTE AS
+( 
+    SELECT MR.*, U.NAME, MO.TITLE
+    FROM MOVIES MO
+    INNER JOIN MOVIERATING MR ON MO.MOVIE_ID = MR.MOVIE_ID
+    INNER JOIN USERS U ON MR.USER_ID = U.USER_ID 
 )
-SELECT user_name AS results
-FROM UserRatings
-WHERE user_rank = 1
+
+(SELECT NAME AS RESULTS
+FROM CTE
+GROUP BY NAME
+ORDER BY COUNT(*) DESC, NAME
+LIMIT 1)
+
 UNION ALL
-SELECT movie_title AS results
-FROM MovieAvgRatings
-WHERE movie_rank = 1;
+
+(SELECT TITLE AS RESULTS
+FROM CTE
+WHERE DATE_FORMAT(CREATED_AT, '%Y-%m') = '2020-02'
+GROUP BY TITLE
+ORDER BY AVG(RATING) DESC, TITLE
+LIMIT 1);
