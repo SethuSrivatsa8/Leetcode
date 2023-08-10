@@ -1,0 +1,4 @@
+# Write your MySQL query statement below
+SELECT  SCORE,R AS "RANK" FROM (
+    SELECT *,DENSE_RANK() OVER(ORDER BY SCORE DESC) AS R FROM SCORES
+) AS CTE 
